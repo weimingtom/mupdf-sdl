@@ -1,6 +1,9 @@
 # mupdf-sdl
 [WIP] My mupdf-x11 SDL1.2 port
 
+## Status  
+* Only MINGW alpha test for Windows, NOT work very well  
+
 ## References  
 * https://mupdf.com/releases
 * https://mupdf.com/downloads/archive/mupdf-1.9a-source.tar.gz  
