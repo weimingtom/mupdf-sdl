@@ -1,5 +1,4 @@
 # Prerequisites
-!COPYING.LIB
 *.d
 
 # Compiled Object files
@@ -26,6 +25,7 @@
 *.la
 *.a
 *.lib
+!COPYING.LIB
 
 # Executables
 *.exe
