@@ -1,3 +1,7 @@
+#mingw == mingw32
+#0 == xubuntu 20.04 64bit, sudo apt install libsdl1.2-dev
+MIYOO := 0
+
 CC = gcc
 CPP := g++
 AR := ar cru
@@ -9,7 +13,9 @@ CPPFLAGS += -I.
 #CPPFLAGS += -g -O2
 CPPFLAGS += -g3 -O0
 
+ifeq ($(MIYOO),mingw)
 CPPFLAGS += -I./SDL-1.2.15/include
+endif
 
 CPPFLAGS += -I./include
 
@@ -48,38 +54,15 @@ ifdef MEMENTO
 CPPFLAGS += -DMEMENTO -DMEMENTO_LEAKONLY
 endif
 
-
-#LOCAL_CFLAGS += -Wall -Wno-maybe-uninitialized
-
-ifeq ($(TARGET_ARCH),arm)
-#LOCAL_CFLAGS += -DARCH_ARM -DARCH_THUMB -DARCH_ARM_CAN_LOAD_UNALIGNED
-endif
-
-ifdef SUPPORT_GPROOF
-#LOCAL_CFLAGS += -DSUPPORT_GPROOF
-endif
-
-#LOCAL_CFLAGS += -DAA_BITS=8
-
-ifdef MEMENTO
-#LOCAL_CFLAGS += -DMEMENTO -DMEMENTO_LEAKONLY
-endif
-
-#ifdef SSL_BUILD
-#LOCAL_CFLAGS += -DHAVE_OPENSSL
-#endif
-
-#ifdef V8_BUILD
-#CPPFLAGS += ./thirdparty/$(V8)/include
-#endif
-
-#ifdef SSL_BUILD
-#CPPFLAGS += ./thirdparty/openssl/include
-#endif
-
 LDFLAGS := 
+ifeq ($(MIYOO),mingw)
 LDFLAGS += -lSDL -L./SDL-1.2.15 -lwinmm -lgdi32 
 LDFLAGS += -lcomdlg32 -lgdi32 -lm -lstdc++
+else
+LDFLAGS += -lSDL
+#-lX11 -lXext 
+LDFLAGS += -lm -lstdc++
+endif
 
 OBJS := 
 
@@ -519,19 +502,24 @@ OBJS += source/pdf/js/pdf-js.o
 
 HELLOCPP_OBJS :=
 HELLOCPP_OBJS += platform/x11/pdfapp.o
-HELLOCPP_OBJS += platform/x11/x11_image.o
+###no need###HELLOCPP_OBJS += platform/x11/x11_image.o
 
 all : mupdf-x11
-
-sdl.a : 
-	make -f Makefile.mingw -C ./SDL-1.2.15
 
 mupdf.a : $(OBJS)
 	$(AR) $@ $(OBJS)
 	$(RANLIB) $@
 
+ifeq ($(MIYOO),mingw)
+sdl.a : 
+	make -f Makefile.mingw -C ./SDL-1.2.15
+
 mupdf-x11: sdl.a mupdf.a $(HELLOCPP_OBJS)
 	$(CC) ./SDL-1.2.15/src/main/dummy/SDL_dummy_main.c ./platform/x11/sdl_main.c $(HELLOCPP_OBJS) mupdf.a -o $@ -I. $(CPPFLAGS) $(LDFLAGS)
+else
+mupdf-x11: mupdf.a $(HELLOCPP_OBJS)
+	$(CC) platform/x11/sdl_main.c $(HELLOCPP_OBJS) mupdf.a -o $@ -I. $(CPPFLAGS) $(LDFLAGS)
+endif
 
 %.o : %.cpp
 	$(CPP) $(CPPFLAGS) -o $@ -c $<
@@ -547,4 +535,8 @@ test:
 
 clean :
 	$(RM) $(OBJS) $(HELLOCPP_OBJS) mupdf.a mupdf-x11 *.exe *.a
+ifeq ($(MIYOO),mingw)
 	make -f Makefile.mingw -C ./SDL-1.2.15 clean
+endif
+
+

@@ -1,4 +1,5 @@
 # Prerequisites
+!COPYING.LIB
 *.d
 
 # Compiled Object files
